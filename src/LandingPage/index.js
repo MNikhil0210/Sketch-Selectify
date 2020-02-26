@@ -1,66 +1,78 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar'
-import { Toolbar, Typography, InputBase } from '@material-ui/core';
-import zemIcon from '../resources/zemoso.svg';
-import SearchIcon from '@material-ui/icons/Search';
-import { makeStyles, fade } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
+import CustomAppBar from '../CustomAppBar';
+import CustomCard from '../CustomCard';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        flexGrow: 1,
-    },
-    appbar: {
-        background: "rgb(245, 248, 250)",
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-        color: '#33475b',
-        marginLeft: '16px',
-        flexGrow: 1,
-    },
-    tool: {
-        marginRight: '8%',
-        marginLeft: '8%'
-    },
-    search: {
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: fade(theme.palette.common.white, 0.15),
-        '&:hover': {
-          backgroundColor: fade(theme.palette.common.white, 0.25),
-        },
-        marginLeft: 0,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-          marginLeft: theme.spacing(1),
-          width: 'auto',
-        },
-      },
-      searchIcon: {
-        width: theme.spacing(7),
-        height: '100%',
-        position: 'absolute',
-        pointerEvents: 'none',
-        display: 'flex',
+    midColor: {
+        background: 'rgb(45, 62, 80)',
+        maxWidth: '100vw',
+        marginBottom: '48px',
+        paddingRight: '22%',
+        paddingLeft: '22%',
+        textAlign: 'center',
         alignItems: 'center',
         justifyContent: 'center',
-      },
-      inputRoot: {
-        color: 'inherit',
-      },
-      inputInput: {
-        padding: theme.spacing(1, 1, 1, 7),
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-          width: 120,
-          '&:focus': {
-            width: 200,
-          },
-        },
-      },
+        height: '380px'
+    },
+    zemTechnology: {
+        marginTop: '90px',
+        color: '#fff',
+        verticalAlign: 'center',
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: '42px',
+        fontWeight: 500,
+    },
+    componentLib: {
+        color: '#fff',
+        fontSize: '18px',
+        marginBottom: '90px',
+        fontWeight: 500,
+        verticalAlign: 'center',
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    bodyFont: {
+        fontSize: '32px',
+        fontWeight: 700,
+        marginBottom: '20px'
+    },
+    midText: {
+        display: 'flex',
+        flexDirection: 'column',
+        verticalAlign: 'center'
+    },
+    body: {
+        paddingRight: '22%',
+        paddingLeft: '22%',
+        textAlign: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#fafafa',
+        marginBottom: '48px'
+    },
+    footer: {
+        height: '2px',
+        width: 'auto',
+        background: '#dfe3eb',
+        marginRight: '22%',
+        marginLeft: '22%',
+        marginTop: '60px',
+        marginBottom: '60px'
+    },
+    copyright: {
+        color: 'rgb(81, 111, 144)',
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: '2%',
+        fontSize: '12px',
+        fontWeight: 400
+    },
 }));
 
 export default function LandingPage() {
@@ -68,26 +80,32 @@ export default function LandingPage() {
     const classes = useStyles();
 
     return (
-        <AppBar position="static" className={classes.appbar}>
-            <Toolbar className={classes.tool}>
-                <img src={zemIcon} alt="Zemoso" />
-                <Typography variant="h6" className={classes.title}>
-                    Sketch-Selectify
-                </Typography>
-                <div className={classes.search}>
-                    <div className={classes.searchIcon}>
-                        <SearchIcon />
-                    </div>
-                    <InputBase
-                        placeholder="Search…"
-                        classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput,
-                        }}
-                        inputProps={{ 'aria-label': 'search' }}
-                    />
+        <div style={{background: '#fafafa', marginBottom: '5%'}}>
+            <CustomAppBar />
+            <div className={classes.midColor}>
+                <div className={classes.midText}>
+                    <Typography className={classes.zemTechnology}>
+                        ZeMoSo Technologies
+                    </Typography>
+                    <Typography className={classes.componentLib}>
+                        Component Library
+                    </Typography>
                 </div>
-            </Toolbar>
-        </AppBar>
+            </div>
+            <div className={classes.body}>
+                <div className={classes.bodyFont}>Welcome to Component Library</div>
+                <div>HubSpot Canvas is the design system that we at HubSpot use to build our products. This library showcases the building blocks that make up our design system, from colors and typography to React-based components and data visualization tools. What you see here is a subset of our components and styles, pulled straight from our production code.</div>
+                <br/>
+                <div>This library is a window into how we build our products here at HubSpot and what it’s like to build the HubSpot product. We’re sharing it because we’re proud of the time and effort we’ve put into creating our design system and optimizing it for developers and designers so that we can keep it evergreen.</div>
+                <br/>
+                <div>If you’re an engineer or designer and you’re excited by what you see here, get in touch.</div>
+            </div>
+            <div className={classes.body}>
+                <div style={{fontSize: '24px', fontWeight: 400, marginBottom: '20px'}}>Explore Zorro Component Library:</div>
+                <CustomCard />
+            </div>
+            <div className={classes.footer}></div>
+            <div className={classes.copyright}>Copyright © 2018 – 2020 Zemoso Technologies Pvt Lmt, Inc.</div>
+        </div>
     );
 }

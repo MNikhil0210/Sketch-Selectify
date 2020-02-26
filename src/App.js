@@ -4,7 +4,9 @@ import LandingPage from './LandingPage';
 
 function App() {
   return (
-    <LandingPage/>
+    <div style={{background: '#fafafa'}}>
+      <LandingPage/>
+    </div>
   );
 }
 
