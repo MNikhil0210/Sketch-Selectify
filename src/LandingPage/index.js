@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CustomAppBar from '../CustomAppBar';
 import CustomCard from '../CustomCard';
 import { Typography } from '@material-ui/core';
+import Branches from '../Branches';
 
 const useStyles = makeStyles(theme => ({
     midColor: {
@@ -14,10 +15,10 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '380px'
+        height: '450px'
     },
     zemTechnology: {
-        marginTop: '90px',
+        marginTop: '180px',
         color: '#fff',
         verticalAlign: 'center',
         textAlign: 'center',
@@ -38,6 +39,8 @@ const useStyles = makeStyles(theme => ({
     },
     bodyFont: {
         fontSize: '32px',
+        color: 'rgb(51,71,91)',
+        lineHeight: '45.76px',
         fontWeight: 700,
         marginBottom: '20px'
     },
@@ -56,13 +59,15 @@ const useStyles = makeStyles(theme => ({
         marginBottom: '48px'
     },
     footer: {
-        height: '2px',
-        width: 'auto',
-        background: '#dfe3eb',
         marginRight: '22%',
         marginLeft: '22%',
         marginTop: '60px',
         marginBottom: '60px'
+    },
+    footerLine: {
+        height: '2px',
+        width: 'auto',
+        background: '#dfe3eb',
     },
     copyright: {
         color: 'rgb(81, 111, 144)',
@@ -73,15 +78,64 @@ const useStyles = makeStyles(theme => ({
         fontSize: '12px',
         fontWeight: 400
     },
+    info :{
+        fontSize: '14px',
+        color: 'rgb(51,71,91)',
+        lineHeight: '20.02px',
+        fontWeight: 400,
+        textAlign: 'center',
+        letterSpacing: '0.14994px',
+    },
+    componentLibText: {
+        fontSize: '24px', 
+        fontWeight: 400, 
+        marginBottom: '20px',
+        color: 'rgb(51,71,91)',
+        lineHeight: '34.32px',
+        textAlign: 'center',
+        letterSpacing: '0.14994px',
+    },
 }));
 
 export default function LandingPage() {
 
     const classes = useStyles();
+    const [page,setPage] = React.useState("MAIN");
+    const [pId, setPid] = React.useState();
+    const [projs, setProjs] = React.useState([]);
+    const [showList,setShowList] = React.useState([])
+    const [searchTerm,setSearchTerm] = React.useState("")
 
-    return (
-        <div style={{background: '#fafafa', marginBottom: '5%'}}>
-            <CustomAppBar />
+    React.useEffect(()=>{
+        const getProjects = async () =>{
+            const Abstract = require('abstract-sdk');
+            const client = new Abstract.Client({
+                accessToken: '000b7eea07546f4f3630530465da4b28de34df221f4839e7084a13a77cd875f1'
+            });
+
+            const listProjs = await client.projects.list();
+            setProjs(listProjs);
+            setShowList(listProjs)
+        }
+        getProjects();
+    },[]);
+
+    React.useEffect(()=>{
+        setShowList(projs.filter(x=>x.name.toLowerCase().includes(searchTerm.toLowerCase())))
+    },[searchTerm]);
+
+    if(page==="BRANCH"){
+        return(
+            <div>
+                <CustomAppBar onSearch = {searchTerm}/>
+                <Branches showList={projs} projId={pId}/>
+            </div>
+        );
+    }
+    else
+        return (
+            <div style={{background: '#fafafa'}}>
+            <CustomAppBar onSearch = {setSearchTerm}/>
             <div className={classes.midColor}>
                 <div className={classes.midText}>
                     <Typography className={classes.zemTechnology}>
@@ -94,18 +148,25 @@ export default function LandingPage() {
             </div>
             <div className={classes.body}>
                 <div className={classes.bodyFont}>Welcome to Component Library</div>
-                <div>HubSpot Canvas is the design system that we at HubSpot use to build our products. This library showcases the building blocks that make up our design system, from colors and typography to React-based components and data visualization tools. What you see here is a subset of our components and styles, pulled straight from our production code.</div>
-                <br/>
-                <div>This library is a window into how we build our products here at HubSpot and what it’s like to build the HubSpot product. We’re sharing it because we’re proud of the time and effort we’ve put into creating our design system and optimizing it for developers and designers so that we can keep it evergreen.</div>
-                <br/>
-                <div>If you’re an engineer or designer and you’re excited by what you see here, get in touch.</div>
+                <div className={classes.info}>
+                    <div>HubSpot Canvas is the design system that we at HubSpot use to build our products. This library showcases the building blocks that make up our design system, from colors and typography to React-based components and data visualization tools. What you see here is a subset of our components and styles, pulled straight from our production code.</div>
+                    <br/>
+                    <div>This library is a window into how we build our products here at HubSpot and what it’s like to build the HubSpot product. We’re sharing it because we’re proud of the time and effort we’ve put into creating our design system and optimizing it for developers and designers so that we can keep it evergreen.</div>
+                    <br/>
+                    <div>If you’re an engineer or designer and you’re excited by what you see here, get in touch.</div>
+                </div>
             </div>
             <div className={classes.body}>
-                <div style={{fontSize: '24px', fontWeight: 400, marginBottom: '20px'}}>Explore Zorro Component Library:</div>
-                <CustomCard />
+                <div className={classes.componentLibText}>Explore Zorro Component Library:</div>
             </div>
-            <div className={classes.footer}></div>
-            <div className={classes.copyright}>Copyright © 2018 – 2020 Zemoso Technologies Pvt Lmt, Inc.</div>
+            
+            <CustomCard projects={showList} respond={(x)=>{setPid(x); setPage("BRANCH")}} />
+            
+
+            <div className={classes.footer}>
+                <div className={classes.footerLine}></div>
+                <div className={classes.copyright}>Copyright © 2018 – 2020 Zemoso Technologies Pvt Lmt, Inc.</div>
+            </div>
         </div>
     );
 }

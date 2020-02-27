@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import tool1 from '../resources/brush.svg';
 import tool2 from '../resources/dove.svg';
@@ -22,8 +22,8 @@ const useStyles = makeStyles(theme => ({
     card: {
         height: 200,
         width: 200,
-        marginLeft: '3%',
-        marginBottom: '3%',
+        marginLeft: '15px',
+        marginBottom: '15px',
         alignItems: 'center',
         textAlign: 'center',
         justifyContent: 'center',
@@ -38,37 +38,36 @@ const useStyles = makeStyles(theme => ({
         width: '80px',
         height: '80px',
     },
+    cardName: {
+        color: 'rgb(51,71,91)',
+        fontSize: '16px',
+        fontWeight: 400,
+        lineHeight: '24px',
+        letterSpacing: '0.14994px'
+    },
 }));
 
-function randPic(){
-    return images[Math.floor(Math.random() * images.length)];
+const randPic = () =>{
+    var rand = Math.floor(Math.random() * images.length)+1;
+    if(rand === 1)
+        return tool1;
+    if(rand === 2)
+        return tool2;
+    if(rand === 3)
+        return tool3;
+    
 }
 
-export default function CustomCard(){
-
-    const [projs, setProjs] = useState([]);
-
-    useEffect(()=>{
-        const getAssets = async () =>{
-            const Abstract = require('abstract-sdk');
-            const client = new Abstract.Client({
-                accessToken: '000b7eea07546f4f3630530465da4b28de34df221f4839e7084a13a77cd875f1'
-            });
-
-            const listProjs = await client.projects.list();
-            setProjs(listProjs);
-        }
-        getAssets();
-    },[]);
+export default function CustomCard(props){
 
     const classes = useStyles();
 
     return(
         <div className={classes.cardHolder}>
-            {projs.map(item=>(
-                <div className={classes.card} key={item.id}>
-                    <img className={classes.img} src={tool1} alt="Random Pic"/>
-                    <p>{item.name}</p>
+            {props.projects.map(item=>(
+                <div className={classes.card} key={item.id} onClick={()=>props.respond(item.id)}>
+                    <img className={classes.img} src={randPic()} alt="Random Pic"/>
+                    <p className={classes.cardName}>{item.name}</p>
                 </div>
             ))}
         </div>

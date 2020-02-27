@@ -12,18 +12,22 @@ const useStyles = makeStyles(theme => ({
     },
     appbar: {
         background: "rgb(245, 248, 250)",
+        zIndex: theme.zIndex.drawer + 1
     },
     menuButton: {
         marginRight: theme.spacing(2),
     },
     title: {
-        color: '#33475b',
+        color: 'rgb(51,71,91)',
         marginLeft: '16px',
+        lineHeight: '28.8px',
+        letterSpacing: '0.135px',
+        fontFamily:'Avenir Next W02",Helvetica,Arial,sans-serif',
         flexGrow: 1,
+        fontSize: '18px',
+        fontWeight: 400,
     },
     tool: {
-        fontSize: 18,
-        fontWeight: 500,
         marginRight: '8%',
         marginLeft: '8%'
     },
@@ -94,7 +98,7 @@ TabPanel.propTypes = {
     };
   }
 
-export default function CustomAppBar() {
+export default function CustomAppBar(props) {
 
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
@@ -104,7 +108,7 @@ export default function CustomAppBar() {
   };
 
     return (
-        <AppBar position="static" className={classes.appbar}>
+        <AppBar position="fixed" className={classes.appbar}>
             <Toolbar className={classes.tool}>
                 <img src={zemIcon} alt="Zemoso" />
                 <Typography variant="h6" className={classes.title}>
@@ -120,6 +124,7 @@ export default function CustomAppBar() {
                     </div>
                     <InputBase
                         placeholder="Search library"
+                        onChange={e=>props.onSearch(e.target.value)}
                         classes={{
                             root: classes.inputRoot,
                             input: classes.inputInput,
