@@ -110,7 +110,7 @@ export default function LandingPage() {
         const getProjects = async () =>{
             const Abstract = require('abstract-sdk');
             const client = new Abstract.Client({
-                accessToken: '000b7eea07546f4f3630530465da4b28de34df221f4839e7084a13a77cd875f1'
+                accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
             });
 
             const listProjs = await client.projects.list();
