@@ -27,6 +27,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Branches(props) {
 
+    const [showList, setShowList] = useState([]);
     const classes = useStyles();
     const pId = props.projId;
     const [branches, setBranches] = useState([]);
@@ -35,67 +36,32 @@ export default function Branches(props) {
     const [temp, setTemp] = useState([]);
     const [assets, setAssets] = useState([]);
     const [pics, setPics] = useState([]);
-    const [images, setImages] = useState([]);
+    const [componentUrls, setComponentUrls] = useState([]);
     const myMap = [];
     var binaryList = [];
     const [binaryString, setBinaryString] = useState([]);
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    // React.useEffect(() => {
+    //     setShowList(assets.filter(x => x.name.toLowerCase().includes(props.searchTerm.toLowerCase())))
+    // }, [props.searchTerm, assets]);
 
-    function filterAssets(helper) {
+
+    async function filterAssets(helper) {
+        const Abstract = require('abstract-sdk');
+        const client = new Abstract.Client({
+            accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+        });
         setTemp(layers.filter(item => item.name.includes(helper)));
-    }
-
-    useEffect(() => {
-        fetchDataFromDB();
-        if (images.length === 0) {
-            const getItems = async () => {
-
-                const Abstract = require('abstract-sdk');
-                const client = new Abstract.Client({
-                    accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
-                });
-
-                const listBranches = await client.branches.list({
-                    projectId: pId
-                });
-                setBranches(listBranches);
-
-                const listFiles = await client.files.list({
-                    projectId: pId,
-                    branchId: listBranches[0].id
-                });
-                setFiles(listFiles);
-
-                const listLayers = await client.layers.list({
-                    projectId: pId,
-                    branchId: listBranches[0].id,
-                    fileId: listFiles[0].id
-                });
-                setLayers(listLayers);
-
-                const mySet = new Set([]);
-                listLayers.forEach(layer => {
-                    layer.name = layer.name.replace("/", "?");
-                    const startIndex = layer.name.indexOf("?");
-                    if (layer.name.indexOf("/") !== -1)
-                        mySet.add(layer.name.substring(startIndex + 1, layer.name.indexOf("/")));
-                    else {
-                        layer.name = layer.name.replace("?", "/");
-                        mySet.add(layer.name.substring(0, layer.name.indexOf("/")));
-                    }
-                })
-                setAssets(mySet);
-
-                for (var i = 0; i < listLayers.length; i++) {
-                    await sleep(300);
-                    const layer = listLayers[i]
-                    client.previews.raw({
+        var listUrls = [];
+        for (var br = 0; br < branches.length; br++) {
+            for (var file = 0; file < files.length; file++) {
+                for (var i = 0; i < layers.filter(item => item.name.includes(helper)).length; i++) {
+                    //await sleep(300);
+                    const layer = layers.filter(item => item.name.includes(helper))[i]
+                    await client.previews.raw({
                         projectId: pId,
-                        branchId: listBranches[0].id,
-                        fileId: listFiles[0].id,
+                        branchId: branches[br].id,
+                        fileId: files[file].id,
                         layerId: layer.id,
                         sha: "latest"
                     }).then(
@@ -109,60 +75,97 @@ export default function Branches(props) {
                             }
                             binary = btoa(binary);
                             binaryList.push(binary);
-                            console.log(binary);
                             myMap[layer.id] = `data:image/png;base64,${binary}`;
-
+                            console.log(binary);
                         }
                     )
+                    const urls = await client.previews.info({
+                        projectId: pId,
+                        branchId: branches[br].id,
+                        fileId: files[file].id,
+                        layerId: layer.id,
+                        sha: "latest"
+                    });
+                    var tempUrl = urls.webUrl;
+                    const len = tempUrl.indexOf("commits");
+                    const commit = tempUrl.substring(0, tempUrl.indexOf("commits"));
+                    listUrls.push(commit + "branches/" + branches[br].id + "/" + tempUrl.substring(len, tempUrl.length));
                 }
-                setBinaryString(binaryList);
-                setPics(myMap);
             }
-            getItems();
-            storeImagesInDB();
         }
+        setComponentUrls(listUrls);
+        setBinaryString(binaryList);
+        setPics(myMap);
+    }
 
-        else {
-            {layers.map(layer=> {images.map(image => myMap[layer.id] = `data:image/png;base64,${image}`)})}
+    useEffect(() => {
+        const abortController = new AbortController();
+        generateComponents();
+        return function cleanup() {
+            abortController.abort();
         }
     }, []);
 
-    async function storeImagesInDB() {
-        fetch("http://localhost:8080/images", {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-                accept: "application/json"
-            },
-            body: JSON.stringify(binaryString.map(x => { return { base64String: x } }))
-        }).then(console.log('Success'));
-    }
+    async function generateComponents() {
 
-    async function fetchDataFromDB() {
-        const image_response = await fetch(
-            "http://localhost:8080/images",
-            {
-                headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json"
-                }
+        const Abstract = require('abstract-sdk');
+        const client = new Abstract.Client({
+            accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+        });
+
+        const listBranches = await client.branches.list({
+            projectId: pId
+        });
+        setBranches(listBranches);
+
+        const listFiles = await client.files.list({
+            projectId: pId,
+            branchId: listBranches[0].id
+        });
+        setFiles(listFiles);
+
+        const listLayers = await client.layers.list({
+            projectId: pId,
+            branchId: listBranches[0].id,
+            fileId: listFiles[0].id
+        });
+        setLayers(listLayers);
+
+        const mySet = new Set([]);
+        listLayers.forEach(layer => {
+            layer.name = layer.name.replace("/", "?");
+            const startIndex = layer.name.indexOf("?");
+            if (layer.name.indexOf("/") !== -1) {
+                mySet.add(layer.name.substring(startIndex + 1, layer.name.indexOf("/")));
+                console.log(layer.name.substring(startIndex + 1, layer.name.indexOf("/")));
             }
-        );
-        const image_body = await image_response.json();
-        setImages(image_body);
+            else {
+                layer.name = layer.name.replace("?", "/");
+                mySet.add(layer.name.substring(0, layer.name.indexOf("/")));
+                console.log(layer.name.substring(0, layer.name.indexOf("/")));
+            }
+        })
+        setAssets(mySet);
     }
 
     return (
         <div className={classes.branch}>
-            <CustomDrawer assets={assets} filterAssets={(x) => filterAssets(x)} />
+            <CustomDrawer assets={assets} searchTerm={props.searchTerm} filterAssets={(x) => filterAssets(x)} />
             <Toolbar />
             <div className={classes.components}>
-                {temp.length ? temp.map(item => (
-                    <div className={classes.imageDistance} key={item.id}>
-                        <h3>{item.name.substring(item.name.lastIndexOf("/") + 1)}</h3>
-                        <img className={classes.image} id={item.id} src={pics[item.id]} alt="Component" />
-                    </div>
-                )) :
+                {temp.length ?
+                    temp.map((item, index) => (
+                        <div key={item.id}>
+                            <div className={classes.imageDistance}>
+                                <h3>{item.name.substring(item.name.lastIndexOf("/") + 1)}</h3>
+                                <img className={classes.image} id={item.id} src={pics[item.id]} alt="I'm working on it. Please be patient!" />
+                            </div>
+                            <a style={{ color: '#000' }} key={componentUrls[index]} href={componentUrls[index]}>
+                                Like me? Click here.
+                            </a>
+                        </div>
+
+                    )) :
                     <div className={classes.componentText}>
                         <h2>What is a component?</h2>
                         <div style={{ marginBottom: '8%' }}>A UI element that can be used more than twice in the same way and can be broken down to its basics. It can have variants or variations (i.e. pagination with or without next arrows). It doesn’t usually have an opinion on content or task. For opinionated uses of components, see patterns.</div>

@@ -48,6 +48,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function CustomDrawer(props) {
+
   const classes = useStyles();
 
   return (
@@ -72,7 +73,7 @@ export default function CustomDrawer(props) {
                   <Button onClick={() => props.filterAssets(asset)}>
                     {asset}
                   </Button>
-                  <Divider style={{marginLeft: '10%', marginRight: '10%', marginTop: '3%', marginBottom: '3%'}}/>
+                  <Divider style={{ marginLeft: '10%', marginRight: '10%', marginTop: '3%', marginBottom: '3%' }} />
                 </div> : null)
           }
         </div>
