@@ -116,21 +116,21 @@ export default function Main() {
 
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
-    const [searchTerm,setSearchTerm] = React.useState("");
+    const [searchTerm, setSearchTerm] = React.useState("");
     const [page, setPage] = useState("Home");
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
-    if(page === "GoHome"){
-        return <Main/>;
+    if (page === "GoHome") {
+        return <Main />;
     }
 
     return (
         <div>
             <AppBar position="fixed" className={classes.appbar}>
                 <Toolbar className={classes.tool}>
-                    <img src={zemIcon} alt="Zemoso" onClick={()=>setPage("GoHome")}></img>
+                    <img src={zemIcon} alt="Zemoso" onClick={() => setPage("GoHome")}></img>
                     <Typography variant="h6" className={classes.title}>
                         Sketch-Selectify
                 </Typography>
@@ -144,7 +144,7 @@ export default function Main() {
                         </div>
                         <InputBase
                             placeholder="Search library"
-                            onChange= {(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             classes={{
                                 root: classes.inputRoot,
                                 input: classes.inputInput,
@@ -155,10 +155,10 @@ export default function Main() {
                 </Toolbar>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <LandingPage searchTerm = {searchTerm}/>
+                <LandingPage searchTerm={searchTerm} />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <AllComponents />
+                <AllComponents searchTerm={searchTerm} />
             </TabPanel>
         </div>
     );

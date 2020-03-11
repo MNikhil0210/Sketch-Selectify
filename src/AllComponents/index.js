@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Toolbar } from '@material-ui/core';
+import { Toolbar, Link } from '@material-ui/core';
 import CustomDrawer from '../CustomDrawer';
 import { makeStyles } from '@material-ui/core/styles';
+import Config from '../Config';
 
 const useStyles = makeStyles(theme => ({
     branch: {
@@ -25,78 +26,76 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export default function AllComponents() {
+export default function AllComponents(props) {
 
     const classes = useStyles();
+    const token = Config.AccessToken.map(x => x.accessToken);
     var [projects, setProjects] = useState([]);
-    var [branches, setBranches] = useState([]);
     var [files, setFiles] = useState([]);
     var [layers, listLayers] = useState([]);
-    var [tempLayer, setTempLayer] = useState([]);
-    const [commits, setCommits] = useState([]);
     const [assets, setAssets] = useState([]);
     const [load, setLoad] = useState(true);
     const [pics, setPics] = useState([]);
     const [componentUrls, setComponentUrls] = useState([]);
     const myMap = [];
-    const [temp, setTemp] = useState([]);
+    var [temp, setTemp] = useState([]);
     var binaryList = [];
     const [binaryString, setBinaryString] = useState([]);
 
     async function filterAssets(helper) {
-        console.log(layers);
+        while (temp.length) {
+            temp.pop();
+        }
+        while (componentUrls.length) {
+            componentUrls.pop();
+        }
         var lid;
         const Abstract = require('abstract-sdk');
         const client = new Abstract.Client({
-            accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+            accessToken: token[0]
         });
-        console.log(layers.length);
         for (var i = 0; i < layers.length; i++) {
-            setTemp(layers[i].filter(item => item.name.includes(helper)));
+            temp.push(layers[i].filter(item => item.name.includes(helper)));
             lid = layers[i];
-
             var listUrls = [];
-            //for (var br = 0; br < branches.length; br++) {
-                for (var i = 0; i < lid.filter(item => item.name.includes(helper)).length; i++) {
-                    const layer = lid.filter(item => item.name.includes(helper))[i]
-                    await client.previews.raw({
-                        projectId: layer.projectId,
-                        branchId: "master",
-                        fileId: layer.fileId,
-                        layerId: layer.id,
-                        sha: layer.sha
-                    }).then(
-                        imageBuffer => {
-                            var arrayBufferView = new Uint8Array(imageBuffer);
-                            var binary = '';
-                            var bytes = arrayBufferView
-                            var len = bytes.byteLength;
-                            for (var i = 0; i < len; i++) {
-                                binary += String.fromCharCode(bytes[i]);
-                            }
-                            binary = btoa(binary);
-                            binaryList.push(binary);
-                            myMap[layer.id] = `data:image/png;base64,${binary}`;
-                            console.log(binary);
+            for (var j = 0; j < lid.filter(item => item.name.includes(helper)).length; j++) {
+                const layer = lid.filter(item => item.name.includes(helper))[j]
+                await client.previews.raw({
+                    projectId: layer.projectId,
+                    branchId: "master",
+                    fileId: layer.fileId,
+                    layerId: layer.id,
+                    sha: "latest"
+                }).then(
+                    imageBuffer => {
+                        var arrayBufferView = new Uint8Array(imageBuffer);
+                        var binary = '';
+                        var bytes = arrayBufferView
+                        var len = bytes.byteLength;
+                        for (var i = 0; i < len; i++) {
+                            binary += String.fromCharCode(bytes[i]);
                         }
-                    )
-                    const urls = await client.previews.info({
-                        projectId: layer.projectId,
-                        branchId: "master",
-                        fileId: layer.fileId,
-                        layerId: layer.id,
-                        sha: layer.sha
-                    });
-                    var tempUrl = urls.webUrl;
-                    const len = tempUrl.indexOf("commits");
-                    const commit = tempUrl.substring(0, tempUrl.indexOf("commits"));
-                    listUrls.push(commit + "branches/"+"master"+"/" + tempUrl.substring(len, tempUrl.length));
+                        binary = btoa(binary);
+                        binaryList.push(binary);
+                        myMap[layer.id] = `data:image/png;base64,${binary}`;
+                        console.log(binary);
+                    }
+                )
+                const urls = await client.previews.info({
+                    projectId: layer.projectId,
+                    branchId: "master",
+                    fileId: layer.fileId,
+                    layerId: layer.id,
+                    sha: "latest"
+                });
+                var tempUrl = urls.webUrl;
+                const len = tempUrl.indexOf("commits");
+                const commit = tempUrl.substring(0, tempUrl.indexOf("commits"));
+                componentUrls.push(commit + "branches/" + "master" + "/" + tempUrl.substring(len, tempUrl.length));
 
-                }
-            //}
+            }
         }
 
-        setComponentUrls(listUrls);
         setBinaryString(binaryList);
         setPics(myMap);
     }
@@ -107,50 +106,41 @@ export default function AllComponents() {
             const mySet = new Set([]);
             const Abstract = require('abstract-sdk');
             const client = new Abstract.Client({
-                accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+                accessToken: token[0]
             });
 
             const listProjects = await client.projects.list();
             projects.push(listProjects);
 
             for (var proj = 0; proj < listProjects.length; proj++) {
-                const listBranches = await client.branches.list({
-                    projectId: listProjects[proj].id
+                const listFiles = await client.files.list({
+                    projectId: listProjects[proj].id,
+                    branchId: "master"
                 });
-                branches.push(listBranches);
+                files.push(listFiles);
 
-                for (var branch = 0; branch < listBranches.length; branch++) {
-                    const listFiles = await client.files.list({
+                for (var file = 0; file < listFiles.length; file++) {
+                    const listLayers = await client.layers.list({
                         projectId: listProjects[proj].id,
-                        branchId: listBranches[branch].id
+                        branchId: "master",
+                        fileId: listFiles[file].id
                     });
-                    files.push(listFiles);
-
-                    for (var file = 0; file < listFiles.length; file++) {
-                        const listLayers = await client.layers.list({
-                            projectId: listProjects[proj].id,
-                            branchId: listBranches[branch].id,
-                            fileId: listFiles[file].id
-                        });
-                        layers.push(listLayers);
+                    layers.push(listLayers);
 
 
-                        listLayers.forEach(layer => {
-                            var tempVar = layer.name;
-                            tempVar = tempVar.replace("/", "?");
-                            const startIndex = tempVar.indexOf("?");
-                            if (tempVar.indexOf("/") !== -1){
-                                console.log(layer.name.substring(startIndex + 1, tempVar.indexOf("/")));
-                                mySet.add(layer.name.substring(startIndex + 1, tempVar.indexOf("/")));
-                            }
-                            else {
-                                tempVar = tempVar.replace("?", "/");
-                                console.log(layer.name.substring(0, tempVar.indexOf("/")));
-                                mySet.add(layer.name.substring(0, tempVar.indexOf("/")));
-                            }
-                        })
+                    listLayers.forEach(layer => {
+                        var tempVar = layer.name;
+                        tempVar = tempVar.replace("/", "?");
+                        const startIndex = tempVar.indexOf("?");
+                        if (tempVar.indexOf("/") !== -1) {
+                            mySet.add(layer.name.substring(startIndex + 1, tempVar.indexOf("/")));
+                        }
+                        else {
+                            tempVar = tempVar.replace("?", "/");
+                            mySet.add(layer.name.substring(0, tempVar.indexOf("/")));
+                        }
+                    })
 
-                    }
                 }
             }
             setAssets(mySet);
@@ -163,19 +153,27 @@ export default function AllComponents() {
         }
     }, []);
 
+    function TODO() {
+        return new Set(Array.from(assets).filter(x => x.toLowerCase().includes(props.searchTerm.toLowerCase())));
+    }
+
     return (
         <div className={classes.branch}>
-            <CustomDrawer assets={assets} filterAssets={(x) => filterAssets(x)} />
+            <CustomDrawer assets={TODO()} searchTerm={props.searchTerm} filterAssets={(x) => filterAssets(x)} />
             <Toolbar />
             <div className={classes.components}>
                 {temp.length ?
-                    temp.map((item, index) => (
-                        <div className={classes.imageDistance} key={item.id}>
-                            <h3>{item.name.substring(item.name.lastIndexOf("/") + 1)}</h3>
-                            <img className={classes.image} id={item.id} src={pics[item.id]} alt="I'm working on it. Please be patient!" />
-                            <a key={componentUrls[index]} href={componentUrls[index]}>
-                                Like me? Click here.
-                            </a>
+                    temp.map((item, idx) => (
+                        <div className={classes.imageDistance} key={idx}>
+                            {item.map((val, index) => (
+                                <div key={index}>
+                                    <h3>{val.name.substring(val.name.lastIndexOf("/") + 1)}</h3>
+                                    <img className={classes.image} id={val.id} src={pics[val.id]} alt="I'm working on it. Please be patient!" />
+                                    <div><Link key={componentUrls[index]} href={componentUrls[index]}>
+                                        Like me? Click here.
+                                    </Link></div>
+                                </div>
+                            ))}
                         </div>
                     )) :
                     <div className={classes.componentText}>
@@ -191,7 +189,3 @@ export default function AllComponents() {
     );
 
 }
-
-
-
-//bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a

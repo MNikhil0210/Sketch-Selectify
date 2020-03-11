@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CustomCard from '../CustomCard';
 import { Typography } from '@material-ui/core';
 import Branches from '../Branches';
+import Config from '../Config';
 
 const useStyles = makeStyles(theme => ({
     midColor: {
@@ -102,31 +103,33 @@ export default function LandingPage(props) {
     const [page, setPage] = React.useState("MAIN");
     const [pId, setPid] = React.useState();
     const [projs, setProjs] = React.useState([]);
-    const [showList, setShowList] = React.useState([])
-    const [searchTerm, setSearchTerm] = React.useState("")
+    const [showList, setShowList] = React.useState([]);
+    const configuredProjects = new Set(Config.Projects.map(x => x.name));
+    const token = Config.AccessToken.map(x=>x.accessToken);
 
     React.useEffect(() => {
         const getProjects = async () => {
             const Abstract = require('abstract-sdk');
             const client = new Abstract.Client({
-                accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+                accessToken: token[0]
             });
 
-            const listProjs = await client.projects.list();
+            var listProjs = await client.projects.list();
+            listProjs = listProjs.filter(proj => configuredProjects.size===0 || configuredProjects.has(proj.name))
             setProjs(listProjs);
-            setShowList(listProjs)
+            setShowList(listProjs);
         }
         getProjects();
     }, []);
 
     React.useEffect(() => {
         setShowList(projs.filter(x => x.name.toLowerCase().includes(props.searchTerm.toLowerCase())))
-    }, [props.searchTerm,projs]);
+    }, [props.searchTerm, projs]);
 
     if (page === "BRANCH") {
         return (
             <div>
-                <Branches showList={projs} projId={pId} searchTerm={props.searchTerm}/>
+                <Branches showList={projs} projId={pId} searchTerm={props.searchTerm} />
             </div>
         );
     }
@@ -163,7 +166,7 @@ export default function LandingPage(props) {
                 <div className={classes.footer}>
                     <div className={classes.footerLine}></div>
                     <div className={classes.copyright}>Copyright © 2018 – 2020 Zemoso Technologies Pvt Lmt, Inc.</div>
-                </div>                
+                </div>
             </div>
         );
 }

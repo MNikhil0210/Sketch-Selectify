@@ -1,7 +1,9 @@
 {
-  "Projects": [
-    {
-      "name": "Marketing Website"
-    }
-  ]
-}
+    "Projects": [
+      {"name":"Product Board"},
+      {"name":"Dashboard UI Kit"}
+    ],
+    "AccessToken": [
+      {"accessToken": "bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a"}
+    ]
+  }

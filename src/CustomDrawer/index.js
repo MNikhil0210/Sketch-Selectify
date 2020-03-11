@@ -67,14 +67,24 @@ export default function CustomDrawer(props) {
 
         <div>
           {
-            Array.from(props.assets).map(asset =>
+            typeof(props.assets) !== "object" ? Array.from(props.assets).map(asset =>
               asset.length !== 0 ?
                 <div key={asset}>
-                  <Button onClick={() => props.filterAssets(asset)}>
+                  <Button onClick={() => { props.filterAssets(asset) }}>
                     {asset}
                   </Button>
                   <Divider style={{ marginLeft: '10%', marginRight: '10%', marginTop: '3%', marginBottom: '3%' }} />
-                </div> : null)
+                </div> : null) :
+              <div>
+                {Array.from(props.assets).map(asset =>
+                  asset.length !== 0 ?
+                    <div key={asset}>
+                      <Button onClick={() => { props.filterAssets(asset) }}>
+                        {asset}
+                      </Button>
+                      <Divider style={{ marginLeft: '10%', marginRight: '10%', marginTop: '3%', marginBottom: '3%' }} />
+                    </div> : null)}
+              </div>
           }
         </div>
       </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Toolbar } from '@material-ui/core';
+import { Toolbar, Link } from '@material-ui/core';
 import CustomDrawer from '../CustomDrawer';
+import Config from '../Config';
 
 const useStyles = makeStyles(theme => ({
     branch: {
@@ -27,7 +28,6 @@ const useStyles = makeStyles(theme => ({
 
 export default function Branches(props) {
 
-    const [showList, setShowList] = useState([]);
     const classes = useStyles();
     const pId = props.projId;
     const [branches, setBranches] = useState([]);
@@ -40,59 +40,56 @@ export default function Branches(props) {
     const myMap = [];
     var binaryList = [];
     const [binaryString, setBinaryString] = useState([]);
-
-    // React.useEffect(() => {
-    //     setShowList(assets.filter(x => x.name.toLowerCase().includes(props.searchTerm.toLowerCase())))
-    // }, [props.searchTerm, assets]);
-
+    const token = Config.AccessToken.map(x=>x.accessToken);
+    const [page, setPage] = React.useState(1);
+    const handleChange = (event, value) => {
+        console.log(value);
+        setPage(value);
+    };
 
     async function filterAssets(helper) {
         const Abstract = require('abstract-sdk');
         const client = new Abstract.Client({
-            accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+            accessToken: token[0]
         });
         setTemp(layers.filter(item => item.name.includes(helper)));
         var listUrls = [];
-        for (var br = 0; br < branches.length; br++) {
-            for (var file = 0; file < files.length; file++) {
-                for (var i = 0; i < layers.filter(item => item.name.includes(helper)).length; i++) {
-                    //await sleep(300);
-                    const layer = layers.filter(item => item.name.includes(helper))[i]
-                    await client.previews.raw({
-                        projectId: pId,
-                        branchId: branches[br].id,
-                        fileId: files[file].id,
-                        layerId: layer.id,
-                        sha: "latest"
-                    }).then(
-                        imageBuffer => {
-                            var arrayBufferView = new Uint8Array(imageBuffer);
-                            var binary = '';
-                            var bytes = arrayBufferView
-                            var len = bytes.byteLength;
-                            for (var i = 0; i < len; i++) {
-                                binary += String.fromCharCode(bytes[i]);
-                            }
-                            binary = btoa(binary);
-                            binaryList.push(binary);
-                            myMap[layer.id] = `data:image/png;base64,${binary}`;
-                            console.log(binary);
-                        }
-                    )
-                    const urls = await client.previews.info({
-                        projectId: pId,
-                        branchId: branches[br].id,
-                        fileId: files[file].id,
-                        layerId: layer.id,
-                        sha: "latest"
-                    });
-                    var tempUrl = urls.webUrl;
-                    const len = tempUrl.indexOf("commits");
-                    const commit = tempUrl.substring(0, tempUrl.indexOf("commits"));
-                    listUrls.push(commit + "branches/" + branches[br].id + "/" + tempUrl.substring(len, tempUrl.length));
+        for (var i = 0; i < layers.filter(item => item.name.includes(helper)).length; i++) {
+            const layer = layers.filter(item => item.name.includes(helper))[i]
+            await client.previews.raw({
+                projectId: pId,
+                branchId: "master",
+                fileId: layer.fileId,
+                layerId: layer.id,
+                sha: "latest"
+            }).then(
+                imageBuffer => {
+                    var arrayBufferView = new Uint8Array(imageBuffer);
+                    var binary = '';
+                    var bytes = arrayBufferView
+                    var len = bytes.byteLength;
+                    for (var i = 0; i < len; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    binary = btoa(binary);
+                    binaryList.push(binary);
+                    myMap[layer.id] = `data:image/png;base64,${binary}`;
+                    console.log(binary);
                 }
-            }
+            )
+            const urls = await client.previews.info({
+                projectId: pId,
+                branchId: "master",
+                fileId: layer.fileId,
+                layerId: layer.id,
+                sha: "latest"
+            });
+            var tempUrl = urls.webUrl;
+            const len = tempUrl.indexOf("commits");
+            const commit = tempUrl.substring(0, tempUrl.indexOf("commits"));
+            listUrls.push(commit + "branches/" + "master" + "/" + tempUrl.substring(len, tempUrl.length));
         }
+        //}
         setComponentUrls(listUrls);
         setBinaryString(binaryList);
         setPics(myMap);
@@ -104,13 +101,13 @@ export default function Branches(props) {
         return function cleanup() {
             abortController.abort();
         }
-    }, []);
+    }, [generateComponents]);
 
     async function generateComponents() {
 
         const Abstract = require('abstract-sdk');
         const client = new Abstract.Client({
-            accessToken: 'bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a'
+            accessToken: token[0]
         });
 
         const listBranches = await client.branches.list({
@@ -137,20 +134,28 @@ export default function Branches(props) {
             const startIndex = layer.name.indexOf("?");
             if (layer.name.indexOf("/") !== -1) {
                 mySet.add(layer.name.substring(startIndex + 1, layer.name.indexOf("/")));
-                console.log(layer.name.substring(startIndex + 1, layer.name.indexOf("/")));
             }
             else {
                 layer.name = layer.name.replace("?", "/");
                 mySet.add(layer.name.substring(0, layer.name.indexOf("/")));
-                console.log(layer.name.substring(0, layer.name.indexOf("/")));
             }
         })
         setAssets(mySet);
     }
+   function TODO()
+   {
+       return new Set(Array.from(assets).filter(x=>x.toLowerCase().includes(props.searchTerm.toLowerCase())));
+   }
+
+   function con(){
+       console.log(componentUrls);
+   }
 
     return (
         <div className={classes.branch}>
-            <CustomDrawer assets={assets} searchTerm={props.searchTerm} filterAssets={(x) => filterAssets(x)} />
+            <CustomDrawer assets={
+                TODO()
+            } searchTerm={props.searchTerm} filterAssets={(x) => filterAssets(x)} />
             <Toolbar />
             <div className={classes.components}>
                 {temp.length ?
@@ -160,11 +165,11 @@ export default function Branches(props) {
                                 <h3>{item.name.substring(item.name.lastIndexOf("/") + 1)}</h3>
                                 <img className={classes.image} id={item.id} src={pics[item.id]} alt="I'm working on it. Please be patient!" />
                             </div>
-                            <a style={{ color: '#000' }} key={componentUrls[index]} href={componentUrls[index]}>
+                            <button onClick={con}>Here</button>
+                            <div><Link key={componentUrls[index]} href={componentUrls[index]}>
                                 Like me? Click here.
-                            </a>
+                            </Link></div>
                         </div>
-
                     )) :
                     <div className={classes.componentText}>
                         <h2>What is a component?</h2>
@@ -179,3 +184,7 @@ export default function Branches(props) {
     );
 
 }
+
+//nikhil -- 394ac22ced246c2ce944adc6a44ecf03cbcce5d3481c79b09a58b6db97512fab
+
+//sowmya -- bb75ec9c833a43d50607d1b10ed72ae04cae4180e6eb803f228314a26a84545a
