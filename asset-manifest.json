@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/Sketch-Selectify/static/css/main.d1b05096.chunk.css",
+    "main.js": "/Sketch-Selectify/static/js/main.2ffee43f.chunk.js",
+    "main.js.map": "/Sketch-Selectify/static/js/main.2ffee43f.chunk.js.map",
+    "runtime-main.js": "/Sketch-Selectify/static/js/runtime-main.4e2ff7c1.js",
+    "runtime-main.js.map": "/Sketch-Selectify/static/js/runtime-main.4e2ff7c1.js.map",
+    "static/js/2.86516ca4.chunk.js": "/Sketch-Selectify/static/js/2.86516ca4.chunk.js",
+    "static/js/2.86516ca4.chunk.js.map": "/Sketch-Selectify/static/js/2.86516ca4.chunk.js.map",
+    "index.html": "/Sketch-Selectify/index.html",
+    "precache-manifest.3bd5009b4be1a9d85874b78c701bf4b8.js": "/Sketch-Selectify/precache-manifest.3bd5009b4be1a9d85874b78c701bf4b8.js",
+    "service-worker.js": "/Sketch-Selectify/service-worker.js",
+    "static/css/main.d1b05096.chunk.css.map": "/Sketch-Selectify/static/css/main.d1b05096.chunk.css.map",
+    "static/js/2.86516ca4.chunk.js.LICENSE.txt": "/Sketch-Selectify/static/js/2.86516ca4.chunk.js.LICENSE.txt",
+    "static/media/brush.svg": "/Sketch-Selectify/static/media/brush.7fa4b58b.svg",
+    "static/media/dove.svg": "/Sketch-Selectify/static/media/dove.fb325b82.svg",
+    "static/media/pencil.svg": "/Sketch-Selectify/static/media/pencil.e56342e5.svg",
+    "static/media/zemoso.svg": "/Sketch-Selectify/static/media/zemoso.b1fb1d7a.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4e2ff7c1.js",
+    "static/js/2.86516ca4.chunk.js",
+    "static/css/main.d1b05096.chunk.css",
+    "static/js/main.2ffee43f.chunk.js"
+  ]
+}
